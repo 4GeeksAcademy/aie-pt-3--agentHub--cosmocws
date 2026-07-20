@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgentHub Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["Space Grotesk", "ui-sans-serif", "system-ui", "sans-serif"],
+            mono: ["IBM Plex Mono", "ui-monospace", "SFMono-Regular", "monospace"],
+          },
+          boxShadow: {
+            panel: "0 16px 35px -25px rgba(15, 23, 42, 0.65)",
+          },
+        },
+      },
+    };
+  </script>
+</head>
+<body class="h-full bg-slate-100 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100">
+  <div class="min-h-full bg-gradient-to-br from-amber-50 via-slate-100 to-cyan-100 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
+    <div id="mobileBackdrop" class="fixed inset-0 z-30 hidden bg-slate-900/50 backdrop-blur-sm md:hidden"></div>
+
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-72 -translate-x-full border-r border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur transition-transform duration-300 dark:border-slate-800 dark:bg-slate-900/95 md:translate-x-0">
+      <div class="mb-10">
+        <p class="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-600 dark:text-cyan-400">AgentHub</p>
+        <h1 class="mt-2 text-2xl font-bold">Panel de administración</h1>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Operaciones internas de agentes IA</p>
+      </div>
+      <nav class="space-y-2" aria-label="Secciones">
+        <button data-nav="dashboard" class="nav-link flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition hover:bg-slate-100 dark:hover:bg-slate-800">
+          <span>📊</span><span>Dashboard</span>
+        </button>
+        <button data-nav="users" class="nav-link flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition hover:bg-slate-100 dark:hover:bg-slate-800">
+          <span>👥</span><span>Gestión de usuarios</span>
+        </button>
+        <button data-nav="agents" class="nav-link flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition hover:bg-slate-100 dark:hover:bg-slate-800">
+          <span>🤖</span><span>Gestión de agentes</span>
+        </button>
+        <button data-nav="skills" class="nav-link flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition hover:bg-slate-100 dark:hover:bg-slate-800">
+          <span>🧩</span><span>Skills</span>
+        </button>
+        <button data-nav="contracts" class="nav-link flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition hover:bg-slate-100 dark:hover:bg-slate-800">
+          <span>📄</span><span>Contrataciones</span>
+        </button>
+        <button data-nav="errors" class="nav-link flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition hover:bg-slate-100 dark:hover:bg-slate-800">
+          <span>🚨</span><span>Log de errores</span>
+        </button>
+      </nav>
+    </aside>
+
+    <div class="md:pl-72">
+      <header class="sticky top-0 z-20 border-b border-slate-200/80 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/85">
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+          <div class="flex items-center gap-3">
+            <button id="openSidebar" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 md:hidden" aria-label="Abrir menú">
+              ☰
+            </button>
+            <div>
+              <p class="text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Sección activa</p>
+              <h2 id="activeSectionLabel" class="text-lg font-semibold">Dashboard</h2>
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3 rounded-full border border-slate-300 bg-white px-4 py-2 dark:border-slate-700 dark:bg-slate-800">
+              <span class="text-sm font-medium">Modo oscuro</span>
+              <button id="themeToggle" class="relative h-6 w-11 rounded-full bg-slate-300 transition dark:bg-cyan-600" aria-label="Cambiar modo oscuro">
+                <span id="themeKnob" class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <section data-section="dashboard" class="panel-section space-y-6">
+          <div>
+            <h3 class="text-2xl font-bold">Dashboard</h3>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Vista rápida de salud financiera y operativa.</p>
+          </div>
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <article class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 shadow-panel dark:border-emerald-900/70 dark:bg-emerald-950/40">
+              <p class="text-sm font-medium text-emerald-700 dark:text-emerald-300">💰 Ingresos (mes)</p>
+              <p class="mt-3 text-3xl font-bold">$248,900</p>
+              <p class="mt-1 text-xs text-emerald-700/80 dark:text-emerald-300/80">+12.4% vs mes anterior</p>
+            </article>
+            <article class="rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-panel dark:border-amber-900/70 dark:bg-amber-950/40">
+              <p class="text-sm font-medium text-amber-700 dark:text-amber-300">🏷️ Pérdida por descuentos</p>
+              <p class="mt-3 text-3xl font-bold">$17,430</p>
+              <p class="mt-1 text-xs text-amber-700/80 dark:text-amber-300/80">Cupones y promociones activas</p>
+            </article>
+            <article class="rounded-2xl border border-cyan-200 bg-cyan-50 p-5 shadow-panel dark:border-cyan-900/70 dark:bg-cyan-950/40">
+              <p class="text-sm font-medium text-cyan-700 dark:text-cyan-300">⚙️ Agentes activos</p>
+              <p class="mt-3 text-3xl font-bold">163</p>
+              <p class="mt-1 text-xs text-cyan-700/80 dark:text-cyan-300/80">Distribuidos en 47 clientes</p>
+            </article>
+            <article class="rounded-2xl border border-rose-200 bg-rose-50 p-5 shadow-panel dark:border-rose-900/70 dark:bg-rose-950/40">
+              <p class="text-sm font-medium text-rose-700 dark:text-rose-300">🚧 Agentes fallando</p>
+              <p class="mt-3 text-3xl font-bold">9</p>
+              <p class="mt-1 text-xs text-rose-700/80 dark:text-rose-300/80">Requieren intervención inmediata</p>
+            </article>
+          </div>
+          <div class="flex min-h-56 items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-white/70 p-6 text-center text-slate-500 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-400">
+            <p class="font-medium">Actividad semanal (placeholder)</p>
+          </div>
+        </section>
+
+        <section data-section="users" class="panel-section hidden space-y-6">
+          <div>
+            <h3 class="text-2xl font-bold">Gestión de usuarios</h3>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Administración de cuentas registradas en AgentHub.</p>
+          </div>
+          <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-panel dark:border-slate-800 dark:bg-slate-900">
+            <table class="min-w-full text-left text-sm">
+              <thead class="bg-slate-50 text-slate-600 dark:bg-slate-800/80 dark:text-slate-300">
+                <tr>
+                  <th class="px-4 py-3 font-semibold">Nombre</th>
+                  <th class="px-4 py-3 font-semibold">Email</th>
+                  <th class="px-4 py-3 font-semibold">Plan</th>
+                  <th class="px-4 py-3 font-semibold">Estado</th>
+                  <th class="px-4 py-3 font-semibold">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="usersTable" class="divide-y divide-slate-200 dark:divide-slate-800"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section data-section="agents" class="panel-section hidden space-y-6">
+          <div>
+            <h3 class="text-2xl font-bold">Gestión de agentes</h3>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Control operativo de agentes alquilados y sus habilidades.</p>
+          </div>
+          <div id="agentsList" class="grid gap-4"></div>
+        </section>
+
+        <section data-section="skills" class="panel-section hidden space-y-6">
+          <div>
+            <h3 class="text-2xl font-bold">Skills</h3>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Catálogo de capacidades que pueden habilitarse en cada agente.</p>
+          </div>
+          <div class="rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-sm text-cyan-900 dark:border-cyan-900/80 dark:bg-cyan-950/40 dark:text-cyan-200">
+            Una skill es una capacidad funcional reutilizable que amplía lo que un agente puede hacer: buscar en web, leer archivos, conectarse a calendarios o ejecutar automatizaciones.
+          </div>
+          <div id="skillsGrid" class="grid grid-cols-1 gap-4 md:grid-cols-2"></div>
+        </section>
+
+        <section data-section="contracts" class="panel-section hidden space-y-6">
+          <div>
+            <h3 class="text-2xl font-bold">Contrataciones de agentes</h3>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Historial de alquileres activos y completados.</p>
+          </div>
+          <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-panel dark:border-slate-800 dark:bg-slate-900">
+            <table class="min-w-full text-left text-sm">
+              <thead class="bg-slate-50 text-slate-600 dark:bg-slate-800/80 dark:text-slate-300">
+                <tr>
+                  <th class="px-4 py-3 font-semibold">Cliente</th>
+                  <th class="px-4 py-3 font-semibold">Agente</th>
+                  <th class="px-4 py-3 font-semibold">Skills</th>
+                  <th class="px-4 py-3 font-semibold">Fechas</th>
+                  <th class="px-4 py-3 font-semibold">Importe</th>
+                  <th class="px-4 py-3 font-semibold">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="contractsTable" class="divide-y divide-slate-200 dark:divide-slate-800"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section data-section="errors" class="panel-section hidden space-y-6">
+          <div>
+            <h3 class="text-2xl font-bold">Log de errores</h3>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Registro operativo de fallos de ejecución y su estado de resolución.</p>
+          </div>
+          <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-panel dark:border-slate-800 dark:bg-slate-900">
+            <table class="min-w-full text-left text-sm">
+              <thead class="bg-slate-50 text-slate-600 dark:bg-slate-800/80 dark:text-slate-300">
+                <tr>
+                  <th class="px-4 py-3 font-semibold">Timestamp</th>
+                  <th class="px-4 py-3 font-semibold">Agente</th>
+                  <th class="px-4 py-3 font-semibold">Tipo</th>
+                  <th class="px-4 py-3 font-semibold">Descripción</th>
+                  <th class="px-4 py-3 font-semibold">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="errorsTable" class="divide-y divide-slate-200 dark:divide-slate-800"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="modalBackdrop" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/70 p-4 backdrop-blur-sm">
+      <div id="modalCard" class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-900">
+        <div class="mb-4 flex items-start justify-between gap-4">
+          <h4 id="modalTitle" class="text-xl font-bold"></h4>
+          <button id="closeModal" class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm transition hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800">Cerrar</button>
+        </div>
+        <div id="modalBody" class="max-h-[70vh] overflow-auto text-sm text-slate-700 dark:text-slate-200"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const users = [
+      { id: 1, name: "Marina Torres", email: "marina@novalink.com", plan: "Enterprise", status: "Activo", joined: "2025-11-02", lastActivity: "2026-07-19 18:14" },
+      { id: 2, name: "Carlos Mejía", email: "carlos@orbitax.io", plan: "Pro", status: "Trial", joined: "2026-02-14", lastActivity: "2026-07-20 08:45" },
+      { id: 3, name: "Elena Ruiz", email: "elena@driftops.ai", plan: "Starter", status: "Suspendido", joined: "2025-09-09", lastActivity: "2026-07-15 11:03" },
+      { id: 4, name: "Javier Lemos", email: "javier@northscale.co", plan: "Pro", status: "Activo", joined: "2026-01-10", lastActivity: "2026-07-20 06:22" },
+      { id: 5, name: "Nora Benítez", email: "nora@zenclient.app", plan: "Enterprise", status: "Activo", joined: "2025-12-01", lastActivity: "2026-07-19 22:50" },
+      { id: 6, name: "Andrés Pujol", email: "andres@helioworks.dev", plan: "Starter", status: "Trial", joined: "2026-03-05", lastActivity: "2026-07-17 17:39" },
+    ];
+
+    const agents = [
+      { id: 1, name: "SalesPilot", owner: "NovaLink", status: "Activo", skills: ["Lead Scoring", "Email Drafting", "CRM Sync"], prompt: "Eres SalesPilot. Tu objetivo es maximizar la conversión de leads B2B. Prioriza claridad, tono profesional y seguimiento en menos de 24h." },
+      { id: 2, name: "DocMiner", owner: "DriftOps", status: "Inactivo", skills: ["PDF Parsing", "Summarization", "Knowledge Indexing"], prompt: "Eres DocMiner. Extrae entidades, resume hallazgos y etiqueta riesgos contractuales en un formato estructurado." },
+      { id: 3, name: "OpsGuardian", owner: "NorthScale", status: "Fallando", skills: ["Incident Triage", "Log Analysis", "Slack Alerts"], prompt: "Eres OpsGuardian. Detecta anomalías operativas y escalas P1/P2 con justificación técnica y pasos inmediatos." },
+      { id: 4, name: "CalendarFlow", owner: "ZenClient", status: "Activo", skills: ["Calendar Management", "Conflict Resolution", "Meeting Briefs"], prompt: "Eres CalendarFlow. Organiza reuniones minimizando choques horarios y priorizando disponibilidad ejecutiva." },
+      { id: 5, name: "SupportLens", owner: "OrbitaX", status: "Fallando", skills: ["Ticket Classification", "Sentiment Analysis", "SLA Monitoring"], prompt: "Eres SupportLens. Clasifica tickets, estima urgencia y sugiere respuestas en tono empático." },
+      { id: 6, name: "WebScout", owner: "HelioWorks", status: "Activo", skills: ["Web Navigation", "Fact Extraction", "Competitive Scan"], prompt: "Eres WebScout. Investiga fuentes públicas y devuelve comparativas accionables con referencias claras." },
+    ];
+
+    const skills = [
+      { id: 1, name: "Web Navigation", description: "Navega sitios y extrae información estructurada.", enabledBy: 42, detail: "Permite interacción con páginas públicas, extracción semántica y validación de fuentes." },
+      { id: 2, name: "Document Reader", description: "Lee PDFs y documentos internos.", enabledBy: 58, detail: "Procesa PDF, DOCX y texto plano para encontrar entidades, fechas y compromisos." },
+      { id: 3, name: "Calendar Sync", description: "Gestiona disponibilidad y eventos.", enabledBy: 21, detail: "Sincroniza calendarios y propone slots con prioridad por rol y zona horaria." },
+      { id: 4, name: "CRM Connector", description: "Consulta y actualiza contactos en CRM.", enabledBy: 37, detail: "Conecta con pipelines de ventas para crear tareas y actualizar etapas." },
+      { id: 5, name: "Slack Alerts", description: "Envía notificaciones automáticas.", enabledBy: 49, detail: "Dispara alertas contextuales con enriquecimiento de logs y enlaces de seguimiento." },
+      { id: 6, name: "Sentiment Analyzer", description: "Detecta tono en conversaciones.", enabledBy: 19, detail: "Clasifica emociones y detecta señales tempranas de churn en soporte." },
+      { id: 7, name: "Invoice Extractor", description: "Extrae datos financieros de facturas.", enabledBy: 12, detail: "Identifica proveedor, monto, impuestos y fechas de vencimiento automáticamente." },
+      { id: 8, name: "Task Automator", description: "Ejecuta flujos repetitivos internos.", enabledBy: 33, detail: "Orquesta tareas secuenciales entre herramientas de operaciones y reporting." },
+    ];
+
+    const contracts = [
+      {
+        id: 1,
+        client: "NovaLink",
+        agent: "SalesPilot",
+        skills: [
+          { name: "CRM Connector", price: 320 },
+          { name: "Email Drafting", price: 210 },
+          { name: "Lead Scoring", price: 260 },
+        ],
+        start: "2026-05-01",
+        end: "2026-10-31",
+      },
+      {
+        id: 2,
+        client: "DriftOps",
+        agent: "DocMiner",
+        skills: [
+          { name: "Document Reader", price: 280 },
+          { name: "Invoice Extractor", price: 160 },
+        ],
+        start: "2026-01-10",
+        end: "2026-07-10",
+      },
+      {
+        id: 3,
+        client: "NorthScale",
+        agent: "OpsGuardian",
+        skills: [
+          { name: "Slack Alerts", price: 190 },
+          { name: "Log Analysis", price: 340 },
+          { name: "Incident Triage", price: 310 },
+        ],
+        start: "2026-06-15",
+        end: "2026-12-15",
+      },
+      {
+        id: 4,
+        client: "ZenClient",
+        agent: "CalendarFlow",
+        skills: [
+          { name: "Calendar Sync", price: 175 },
+          { name: "Meeting Briefs", price: 120 },
+        ],
+        start: "2026-03-01",
+        end: "2026-09-01",
+      },
+    ];
+
+    const errors = [
+      { id: 1, timestamp: "2026-07-20 08:41", agent: "OpsGuardian", type: "Timeout", description: "Consulta a API de incidentes superó 10s.", trace: "TimeoutError: upstream request exceeded 10000ms\n at fetchIncidentFeed (ops.js:88)\n at processTicksAndRejections (internal/process/task_queues:95)", resolved: false },
+      { id: 2, timestamp: "2026-07-20 08:20", agent: "SupportLens", type: "Auth", description: "Token de CRM vencido durante sincronización.", trace: "AuthError: token expired\n at crmSync (connectors/crm.js:43)\n at executeSkill (runtime/skill-engine.js:112)", resolved: false },
+      { id: 3, timestamp: "2026-07-20 07:49", agent: "DocMiner", type: "Parsing", description: "No se pudo parsear PDF escaneado.", trace: "ParsingError: unsupported document encoding\n at parsePdf (reader/pdf-worker.js:51)", resolved: false },
+      { id: 4, timestamp: "2026-07-20 06:30", agent: "WebScout", type: "Integración", description: "Proveedor externo devolvió 503 intermitente.", trace: "HttpError: 503 Service Unavailable\n at providerCall (web/provider.js:72)", resolved: false },
+      { id: 5, timestamp: "2026-07-19 22:11", agent: "SalesPilot", type: "Runtime", description: "Referencia indefinida en plantilla de prompt.", trace: "ReferenceError: campaignTone is not defined\n at renderTemplate (sales/prompt.js:19)", resolved: true },
+      { id: 6, timestamp: "2026-07-19 21:05", agent: "CalendarFlow", type: "Timeout", description: "Reintentos agotados con proveedor calendar.", trace: "TimeoutError: retry limit reached after 3 attempts\n at syncCalendar (calendar/client.js:94)", resolved: false },
+      { id: 7, timestamp: "2026-07-19 19:24", agent: "OpsGuardian", type: "Auth", description: "Credenciales de Slack inválidas.", trace: "AuthError: invalid_scope\n at postAlert (integrations/slack.js:64)", resolved: false },
+      { id: 8, timestamp: "2026-07-19 18:56", agent: "DocMiner", type: "Parsing", description: "JSON de extracción incompleto.", trace: "SyntaxError: Unexpected end of JSON input\n at JSON.parse (<anonymous>)\n at normalizeOutput (reader/normalize.js:38)", resolved: false },
+      { id: 9, timestamp: "2026-07-19 17:31", agent: "SupportLens", type: "Integración", description: "Webhook de tickets rechazado por schema.", trace: "ValidationError: payload missing field ticket.priority\n at validateSchema (hooks/schema.js:21)", resolved: false },
+      { id: 10, timestamp: "2026-07-19 16:44", agent: "SalesPilot", type: "Runtime", description: "Fallo en regla de asignación de lead.", trace: "TypeError: cannot read properties of undefined (reading 'region')\n at assignLead (sales/rules.js:57)", resolved: false },
+    ];
+
+    const sectionLabels = {
+      dashboard: "Dashboard",
+      users: "Gestión de usuarios",
+      agents: "Gestión de agentes",
+      skills: "Skills",
+      contracts: "Contrataciones",
+      errors: "Log de errores",
+    };
+
+    const statusBadgeClass = {
+      Activo: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300",
+      Trial: "bg-cyan-100 text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300",
+      Suspendido: "bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300",
+      Inactivo: "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+      Fallando: "bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300",
+    };
+
+    const errorTypeBadgeClass = {
+      Timeout: "bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300",
+      Auth: "bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300",
+      Parsing: "bg-violet-100 text-violet-700 dark:bg-violet-950/60 dark:text-violet-300",
+      Integración: "bg-cyan-100 text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300",
+      Runtime: "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+    };
+
+    const usersTable = document.getElementById("usersTable");
+    const agentsList = document.getElementById("agentsList");
+    const skillsGrid = document.getElementById("skillsGrid");
+    const contractsTable = document.getElementById("contractsTable");
+    const errorsTable = document.getElementById("errorsTable");
+
+    const themeToggle = document.getElementById("themeToggle");
+    const themeKnob = document.getElementById("themeKnob");
+
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalBody = document.getElementById("modalBody");
+    const closeModalButton = document.getElementById("closeModal");
+
+    const openSidebarButton = document.getElementById("openSidebar");
+    const sidebar = document.getElementById("sidebar");
+    const mobileBackdrop = document.getElementById("mobileBackdrop");
+
+    function currency(value) {
+      return `$${value.toLocaleString("en-US")}`;
+    }
+
+    function renderUsers() {
+      usersTable.innerHTML = users
+        .map((user) => `
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/60" data-row-type="user" data-row-id="${user.id}">
+            <td class="px-4 py-3 font-medium">${user.name}</td>
+            <td class="px-4 py-3 text-slate-600 dark:text-slate-300">${user.email}</td>
+            <td class="px-4 py-3">${user.plan}</td>
+            <td class="px-4 py-3">
+              <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusBadgeClass[user.status]}">${user.status}</span>
+            </td>
+            <td class="px-4 py-3">
+              ${dropdownMarkup("user", user.id)}
+            </td>
+          </tr>
+        `)
+        .join("");
+    }
+
+    function renderAgents() {
+      agentsList.innerHTML = agents
+        .map(
+          (agent) => `
+            <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-panel dark:border-slate-800 dark:bg-slate-900" data-row-type="agent" data-row-id="${agent.id}">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p class="text-lg font-semibold">${agent.name}</p>
+                  <p class="text-sm text-slate-600 dark:text-slate-400">Propietario: ${agent.owner}</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusBadgeClass[agent.status]}">${agent.status}</span>
+                  ${dropdownMarkup("agent", agent.id)}
+                </div>
+              </div>
+              <div class="mt-4">
+                <button data-collapse-id="${agent.id}" class="collapse-toggle inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold transition hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800">
+                  <span>Skills</span>
+                  <span data-chevron-id="${agent.id}" class="transition-transform">⌄</span>
+                </button>
+                <div data-skills-id="${agent.id}" class="mt-2 max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
+                  <div class="flex flex-wrap gap-2 pt-2">
+                    ${agent.skills
+                      .map((skill) => `<span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200">${skill}</span>`)
+                      .join("")}
+                  </div>
+                </div>
+              </div>
+            </article>
+          `
+        )
+        .join("");
+    }
+
+    function renderSkills() {
+      skillsGrid.innerHTML = skills
+        .map(
+          (skill) => `
+            <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-panel dark:border-slate-800 dark:bg-slate-900" data-row-type="skill" data-row-id="${skill.id}">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <h4 class="text-lg font-semibold">${skill.name}</h4>
+                  <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">${skill.description}</p>
+                </div>
+                ${dropdownMarkup("skill", skill.id)}
+              </div>
+              <div class="mt-4 inline-flex items-center gap-2 rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300">
+                ${skill.enabledBy} agentes habilitados
+              </div>
+            </article>
+          `
+        )
+        .join("");
+    }
+
+    function renderContracts() {
+      contractsTable.innerHTML = contracts
+        .map((contract) => {
+          const total = contract.skills.reduce((acc, item) => acc + item.price, 0);
+          const preview = contract.skills.slice(0, 2).map((item) => item.name).join(", ");
+          const extra = contract.skills.length > 2 ? ` +${contract.skills.length - 2}` : "";
+
+          return `
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/60" data-row-type="contract" data-row-id="${contract.id}">
+              <td class="px-4 py-3 font-medium">${contract.client}</td>
+              <td class="px-4 py-3">${contract.agent}</td>
+              <td class="px-4 py-3 text-xs">
+                <span class="rounded-full bg-slate-100 px-2 py-1 dark:bg-slate-800">${preview}${extra}</span>
+              </td>
+              <td class="px-4 py-3 text-xs text-slate-600 dark:text-slate-300">${contract.start} → ${contract.end}</td>
+              <td class="px-4 py-3 font-semibold">${currency(total)}</td>
+              <td class="px-4 py-3">${dropdownMarkup("contract", contract.id)}</td>
+            </tr>
+          `;
+        })
+        .join("");
+    }
+
+    function renderErrors() {
+      errorsTable.innerHTML = errors
+        .map((item) => {
+          const resolvedBadge = item.resolved
+            ? '<span class="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">Resuelto</span>'
+            : "";
+
+          return `
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/60 ${item.resolved ? "opacity-75" : ""}" data-row-type="error" data-row-id="${item.id}">
+              <td class="px-4 py-3 text-xs font-mono">${item.timestamp}</td>
+              <td class="px-4 py-3 font-medium">${item.agent}</td>
+              <td class="px-4 py-3">
+                <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${errorTypeBadgeClass[item.type]}">${item.type}</span>
+                ${resolvedBadge}
+              </td>
+              <td class="px-4 py-3 text-slate-600 dark:text-slate-300">${item.description}</td>
+              <td class="px-4 py-3">${dropdownMarkup("error", item.id)}</td>
+            </tr>
+          `;
+        })
+        .join("");
+    }
+
+    function dropdownMarkup(type, id) {
+      return `
+        <div class="relative inline-block text-left">
+          <button class="action-toggle rounded-lg border border-slate-300 px-2 py-1 text-lg leading-none transition hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800" data-menu-button="${type}-${id}" aria-label="Acciones">
+            ⋮
+          </button>
+          <div class="action-menu absolute right-0 z-10 mt-2 hidden w-40 rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-800" data-menu="${type}-${id}">
+            <button class="menu-action block w-full px-3 py-2 text-left text-sm hover:bg-slate-100 dark:hover:bg-slate-700" data-action="view" data-entity="${type}" data-id="${id}">Ver detalle</button>
+            ${type === "error" ? '<button class="menu-action block w-full px-3 py-2 text-left text-sm hover:bg-slate-100 dark:hover:bg-slate-700" data-action="resolve" data-entity="error" data-id="' + id + '">Marcar como resuelto</button>' : ""}
+            ${type === "agent" ? '<button class="menu-action block w-full px-3 py-2 text-left text-sm hover:bg-slate-100 dark:hover:bg-slate-700" data-action="configure" data-entity="agent" data-id="' + id + '">Configurar</button>' : ""}
+            <button class="menu-action block w-full px-3 py-2 text-left text-sm text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/30" data-action="delete" data-entity="${type}" data-id="${id}">Eliminar</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function closeAllDropdowns() {
+      document.querySelectorAll(".action-menu").forEach((menu) => menu.classList.add("hidden"));
+    }
+
+    function openModal(title, contentHtml) {
+      modalTitle.textContent = title;
+      modalBody.innerHTML = contentHtml;
+      modalBackdrop.classList.remove("hidden");
+      modalBackdrop.classList.add("flex");
+    }
+
+    function closeModal() {
+      modalBackdrop.classList.add("hidden");
+      modalBackdrop.classList.remove("flex");
+      modalBody.innerHTML = "";
+      modalTitle.textContent = "";
+    }
+
+    function openEntityDetail(entity, id) {
+      const numericId = Number(id);
+
+      if (entity === "user") {
+        const user = users.find((item) => item.id === numericId);
+        if (!user) return;
+
+        openModal(
+          `Usuario: ${user.name}`,
+          `<div class="space-y-2">
+            <p><strong>Email:</strong> ${user.email}</p>
+            <p><strong>Plan:</strong> ${user.plan}</p>
+            <p><strong>Estado:</strong> ${user.status}</p>
+            <p><strong>Fecha de alta:</strong> ${user.joined}</p>
+            <p><strong>Última actividad:</strong> ${user.lastActivity}</p>
+          </div>`
+        );
+      }
+
+      if (entity === "agent") {
+        const agent = agents.find((item) => item.id === numericId);
+        if (!agent) return;
+
+        openModal(
+          `Agente: ${agent.name}`,
+          `<div class="space-y-3">
+            <p><strong>Propietario:</strong> ${agent.owner}</p>
+            <p><strong>Estado:</strong> ${agent.status}</p>
+            <div><strong>Skills:</strong> ${agent.skills.join(", ")}</div>
+            <div>
+              <p class="mb-1 font-semibold">Prompt de sistema</p>
+              <textarea class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm dark:border-slate-700 dark:bg-slate-800" rows="6">${agent.prompt}</textarea>
+            </div>
+          </div>`
+        );
+      }
+
+      if (entity === "skill") {
+        const skill = skills.find((item) => item.id === numericId);
+        if (!skill) return;
+
+        openModal(
+          `Skill: ${skill.name}`,
+          `<div class="space-y-2">
+            <p><strong>Descripción:</strong> ${skill.description}</p>
+            <p><strong>Agentes habilitados:</strong> ${skill.enabledBy}</p>
+            <p><strong>Detalle:</strong> ${skill.detail}</p>
+          </div>`
+        );
+      }
+
+      if (entity === "contract") {
+        const contract = contracts.find((item) => item.id === numericId);
+        if (!contract) return;
+
+        const rows = contract.skills
+          .map((item) => `<tr><td class="px-3 py-2">${item.name}</td><td class="px-3 py-2 text-right font-mono">${currency(item.price)}</td></tr>`)
+          .join("");
+        const total = contract.skills.reduce((acc, item) => acc + item.price, 0);
+
+        openModal(
+          `Contrato: ${contract.client} · ${contract.agent}`,
+          `<div class="space-y-3">
+            <p><strong>Vigencia:</strong> ${contract.start} a ${contract.end}</p>
+            <div class="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
+              <table class="w-full text-sm">
+                <thead class="bg-slate-50 dark:bg-slate-800">
+                  <tr><th class="px-3 py-2 text-left">Skill</th><th class="px-3 py-2 text-right">Precio</th></tr>
+                </thead>
+                <tbody>${rows}</tbody>
+                <tfoot class="bg-slate-50 font-bold dark:bg-slate-800">
+                  <tr><td class="px-3 py-2">Total</td><td class="px-3 py-2 text-right font-mono">${currency(total)}</td></tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>`
+        );
+      }
+
+      if (entity === "error") {
+        const item = errors.find((entry) => entry.id === numericId);
+        if (!item) return;
+
+        openModal(
+          `Error: ${item.agent}`,
+          `<div class="space-y-2">
+            <p><strong>Timestamp:</strong> ${item.timestamp}</p>
+            <p><strong>Tipo:</strong> ${item.type}</p>
+            <p><strong>Resumen:</strong> ${item.description}</p>
+            <div>
+              <p class="mb-1 font-semibold">Traza completa</p>
+              <pre class="max-h-64 overflow-auto rounded-lg bg-slate-100 p-3 font-mono text-xs dark:bg-slate-800">${item.trace}</pre>
+            </div>
+          </div>`
+        );
+      }
+    }
+
+    function configureAgent(id) {
+      const agent = agents.find((item) => item.id === Number(id));
+      if (!agent) return;
+
+      openModal(
+        `Configurar: ${agent.name}`,
+        `<div class="space-y-2">
+          <p class="text-sm text-slate-600 dark:text-slate-300">Edita el prompt de sistema del agente. Este campo es editable en el prototipo.</p>
+          <textarea class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm dark:border-slate-700 dark:bg-slate-800" rows="10">${agent.prompt}</textarea>
+        </div>`
+      );
+    }
+
+    function softDelete(entity, id) {
+      const row = document.querySelector(`[data-row-type="${entity}"][data-row-id="${id}"]`);
+      if (!row) return;
+      row.classList.add("opacity-40");
+      row.classList.add("line-through");
+    }
+
+    function markResolved(id) {
+      const error = errors.find((item) => item.id === Number(id));
+      if (!error) return;
+      error.resolved = true;
+      renderErrors();
+    }
+
+    function setTheme(isDark) {
+      document.documentElement.classList.toggle("dark", isDark);
+      localStorage.setItem("agenthub-theme", isDark ? "dark" : "light");
+      themeKnob.classList.toggle("translate-x-5", isDark);
+    }
+
+    function applyThemeFromStorage() {
+      const saved = localStorage.getItem("agenthub-theme");
+      const shouldUseDark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setTheme(shouldUseDark);
+    }
+
+    function updateActiveSection(sectionKey) {
+      document.querySelectorAll(".panel-section").forEach((section) => {
+        section.classList.toggle("hidden", section.dataset.section !== sectionKey);
+      });
+
+      document.querySelectorAll(".nav-link").forEach((link) => {
+        const isActive = link.dataset.nav === sectionKey;
+        link.classList.toggle("bg-slate-900", isActive);
+        link.classList.toggle("text-white", isActive);
+        link.classList.toggle("dark:bg-cyan-500", isActive);
+        link.classList.toggle("dark:text-slate-900", isActive);
+      });
+
+      document.getElementById("activeSectionLabel").textContent = sectionLabels[sectionKey] || sectionLabels.dashboard;
+    }
+
+    function setSectionFromHash() {
+      const section = window.location.hash.replace("#", "") || "dashboard";
+      const validSection = sectionLabels[section] ? section : "dashboard";
+      updateActiveSection(validSection);
+    }
+
+    function closeMobileSidebar() {
+      sidebar.classList.add("-translate-x-full");
+      mobileBackdrop.classList.add("hidden");
+    }
+
+    function openMobileSidebar() {
+      sidebar.classList.remove("-translate-x-full");
+      mobileBackdrop.classList.remove("hidden");
+    }
+
+    function handleClickEvents(event) {
+      const menuButton = event.target.closest(".action-toggle");
+      const actionButton = event.target.closest(".menu-action");
+      const collapseButton = event.target.closest(".collapse-toggle");
+      const navButton = event.target.closest(".nav-link");
+
+      if (menuButton) {
+        const menuId = menuButton.dataset.menuButton;
+        const menu = document.querySelector(`[data-menu="${menuId}"]`);
+        const isHidden = menu.classList.contains("hidden");
+        closeAllDropdowns();
+        if (isHidden) menu.classList.remove("hidden");
+        return;
+      }
+
+      if (actionButton) {
+        const action = actionButton.dataset.action;
+        const entity = actionButton.dataset.entity;
+        const id = actionButton.dataset.id;
+
+        closeAllDropdowns();
+
+        if (action === "view") openEntityDetail(entity, id);
+        if (action === "configure") configureAgent(id);
+        if (action === "delete") softDelete(entity, id);
+        if (action === "resolve") markResolved(id);
+
+        return;
+      }
+
+      if (collapseButton) {
+        const collapseId = collapseButton.dataset.collapseId;
+        const content = document.querySelector(`[data-skills-id="${collapseId}"]`);
+        const chevron = document.querySelector(`[data-chevron-id="${collapseId}"]`);
+
+        const isExpanded = content.dataset.expanded === "true";
+        if (isExpanded) {
+          content.style.maxHeight = "0px";
+          content.dataset.expanded = "false";
+          chevron.classList.remove("rotate-180");
+        } else {
+          content.style.maxHeight = `${content.scrollHeight}px`;
+          content.dataset.expanded = "true";
+          chevron.classList.add("rotate-180");
+        }
+        return;
+      }
+
+      if (navButton) {
+        window.location.hash = navButton.dataset.nav;
+        if (window.innerWidth < 768) closeMobileSidebar();
+        return;
+      }
+
+      if (!event.target.closest(".action-menu") && !event.target.closest(".action-toggle")) {
+        closeAllDropdowns();
+      }
+    }
+
+    function initialize() {
+      renderUsers();
+      renderAgents();
+      renderSkills();
+      renderContracts();
+      renderErrors();
+      applyThemeFromStorage();
+      setSectionFromHash();
+
+      document.addEventListener("click", handleClickEvents);
+
+      themeToggle.addEventListener("click", () => {
+        const isDark = !document.documentElement.classList.contains("dark");
+        setTheme(isDark);
+      });
+
+      window.addEventListener("hashchange", setSectionFromHash);
+
+      closeModalButton.addEventListener("click", closeModal);
+      modalBackdrop.addEventListener("click", (event) => {
+        if (event.target === modalBackdrop) closeModal();
+      });
+
+      openSidebarButton.addEventListener("click", openMobileSidebar);
+      mobileBackdrop.addEventListener("click", closeMobileSidebar);
+
+      if (window.innerWidth < 768) {
+        closeMobileSidebar();
+      }
+    }
+
+    initialize();
+  </script>
+</body>
+</html>
